@@ -1,18 +1,48 @@
-Pneumonia Detection using Deep Learning & Transfer LearningA deep learning project utilizing Transfer Learning with the VGG16 Convolutional Neural Network (CNN) architecture to classify chest X-ray images into two categories: Pneumonia and Normal.📌 Table of ContentsAbout The ProjectTools & TechnologiesDatasetStep-by-Step ImplementationModel Training & ResultsMaking Predictions📖 About The ProjectPneumonia is a dangerous lung infection that may occur in one or both lungs, usually caused by viruses, fungi, or bacteria. Early and accurate detection using chest X-rays is vital for effective treatment. This project implements a pre-trained VGG16 model, freezing its feature extraction layers and appending custom dense layers to classify chest X-ray scans into Pneumonia or Normal.🛠️ Tools and TechnologiesPythonTensorFlow & Keras: For building and training deep learning models.VGG16 Architecture: A widely used CNN architecture pre-trained on the ImageNet database.Transfer Learning (TL): Reusing pre-trained weights from ImageNet (1000 classes) to speed up training and boost performance on medical X-ray data.SciPy: Used for scientific computing and image transformations.Matplotlib & Glob: For data visualization and retrieving file/pathnames matching a specified pattern.📂 DatasetThe Chest X-ray dataset is sourced from Kaggle. It is structured into train, test, and validation directories, containing images separated into two folders: PNEUMONIA and NORMAL.chest_xray/
-├── train/
-│   ├── NORMAL/
-│   └── PNEUMONIA/
-├── test/
-│   ├── NORMAL/
-│   └── PNEUMONIA/
-└── val/
-    ├── NORMAL/
-    └── PNEUMONIA/
-⚙️ Step-by-Step Implementation1. Install Required Librariespip install tensorflow
-pip install keras
-pip install scipy
-pip install glob2
-2. Import Dependencies & Define Image ShapeWe use a fixed input image size of 224 x 224 with 3 color channels (RGB), which is required by the VGG16 architecture.from keras.models import Model
+<div align="center">
+  <h1>Pneumonia Detection using Deep Learning & Transfer Learning</h1>
+  <p>A deep learning project utilizing transfer learning with the VGG16 CNN architecture to classify chest X-ray images into Pneumonia and Normal categories.</p>
+</div>
+
+<hr>
+
+<h2>📌 Table of Contents</h2>
+<ul>
+  <li><a href="#about-the-project">About The Project</a></li>
+  <li><a href="#tools-and-technologies">Tools & Technologies</a></li>
+  <li><a href="#dataset">Dataset</a></li>
+  <li><a href="#step-by-step-implementation">Step-by-Step Implementation</a></li>
+  <li><a href="#model-training-results">Model Training & Results</a></li>
+  <li><a href="#making-predictions">Making Predictions</a></li>
+</ul>
+
+<hr>
+
+<h2 id="about-the-project">📖 About The Project</h2>
+<p>Pneumonia is a serious lung infection that affects one or both lungs. Early and accurate detection using chest X-rays is vital for effective treatment. This project implements a pre-trained VGG16 model, freezing its feature extraction layers and appending custom dense layers to classify chest X-ray scans with high accuracy.</p>
+
+<h2 id="tools-and-technologies">🛠️ Tools and Technologies</h2>
+<ul>
+  <li><strong>Python</strong></li>
+  <li><strong>TensorFlow & Keras</strong>: For building and training deep learning models.</li>
+  <li><strong>VGG16 Architecture</strong>: A robust CNN pre-trained on the ImageNet database.</li>
+  <li><strong>Transfer Learning</strong>: Reusing pre-trained weights to speed up training and boost performance.</li>
+  <li><strong>SciPy</strong>: Used for scientific computing and image transformations.</li>
+  <li><strong>Matplotlib & Glob</strong>: For visualization and file/path retrieval.</li>
+</ul>
+
+<h2 id="dataset">📂 Dataset</h2>
+<p>The chest X-ray dataset is sourced from Kaggle. It is structured into <code>train</code>, <code>test</code>, and <code>validation</code> directories, containing images separated into folders for <strong>Pneumonia</strong> and <strong>Normal</strong> classes.</p>
+
+<h2 id="step-by-step-implementation">⚙️ Step-by-Step Implementation</h2>
+
+<h3>1. Install Required Libraries</h3>
+<pre><code>!pip install tensorflow
+!pip install keras
+!pip install scipy
+!pip install glob2</code></pre>
+
+<h3>2. Import Dependencies & Define Image Shape</h3>
+<pre><code>from keras.models import Model
 from keras.layers import Flatten, Dense
 from keras.applications.vgg16 import VGG16
 import matplotlib.pyplot as plot
@@ -20,25 +50,34 @@ from glob import glob
 
 IMAGESHAPE = [224, 224, 3] 
 training_data = 'chest_xray/train'
-testing_data = 'chest_xray/test'
-3. Load VGG16 with Pre-trained ImageNet WeightsSetting include_top=False drops the original 1000-class output layer of ImageNet so we can attach our own custom classification layer.vgg_model = VGG16(input_shape=IMAGESHAPE, weights='imagenet', include_top=False)
+testing_data = 'chest_xray/test'</code></pre>
 
-# Freeze base layers so they are not re-trained
+<h3>3. Load VGG16 with Pre-trained ImageNet Weights</h3>
+<p>We set <code>include_top=False</code> to drop the original 1000-class output layer of ImageNet.</p>
+<pre><code>vgg_model = VGG16(input_shape=IMAGESHAPE, weights='imagenet', include_top=False)
+
+# Freeze base layers
 for each_layer in vgg_model.layers:
-    each_layer.trainable = False
-4. Add Custom Classification Layersclasses = glob('chest_xray/train/*')
+    each_layer.trainable = False</code></pre>
+
+<h3>4. Add Custom Classification Layers</h3>
+<pre><code>classes = glob('chest_xray/train/*')
 
 flatten_layer = Flatten()(vgg_model.output)
 prediction = Dense(len(classes), activation='softmax')(flatten_layer)
 
 final_model = Model(inputs=vgg_model.input, outputs=prediction)
-final_model.summary()
-5. Compile the Modelfinal_model.compile( 
+final_model.summary()</code></pre>
+
+<h3>5. Compile the Model</h3>
+<pre><code>final_model.compile( 
   loss='categorical_crossentropy',
   optimizer='adam',
   metrics=['accuracy']
-)
-6. Data Augmentation & LoadingUsing ImageDataGenerator to rescale pixel values and apply random transformations (shear, zoom, horizontal flip) to prevent overfitting.from tensorflow.keras.preprocessing.image import ImageDataGenerator
+)</code></pre>
+
+<h3>6. Data Augmentation & Loading with ImageDataGenerator</h3>
+<pre><code>from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 train_datagen = ImageDataGenerator(
     rescale = 1./255,
@@ -61,8 +100,10 @@ test_set = testing_datagen.flow_from_directory(
     target_size = (224, 224),
     batch_size = 4,
     class_mode = 'categorical'
-)
-7. Train & Save the Modelfitted_model = final_model.fit(
+)</code></pre>
+
+<h3>7. Train and Save the Model</h3>
+<pre><code>fitted_model = final_model.fit(
     training_set,
     validation_data=test_set,
     epochs=5,
@@ -70,31 +111,32 @@ test_set = testing_datagen.flow_from_directory(
     validation_steps=len(test_set)
 )
 
-# Save the trained model for future inference
-final_model.save('our_model.h5')
-📊 Model Training & ResultsEpochTraining AccuracyTraining LossValidation AccuracyValidation LossEpoch 1/588.30%0.441685.42%0.9806Epoch 3/594.52%0.215288.46%0.6164Epoch 5/595.32%0.221476.28%1.9244🔮 Making Predictions on New X-RaysOnce our_model.h5 is saved, you can load it to run inference on individual X-ray images:from keras.preprocessing import image
+final_model.save('our_model.h5')</code></pre>
+
+<h2 id="model-training-results">📊 Model Training & Results</h2>
+<ul>
+  <li><strong>Epoch 1/5:</strong> accuracy: 0.8830 | loss: 0.4416 | val_accuracy: 0.8542 | val_loss: 0.9806</li>
+  <li><strong>Epoch 3/5:</strong> accuracy: 0.9452 | loss: 0.2152 | val_accuracy: 0.8846 | val_loss: 0.6164</li>
+  <li><strong>Epoch 5/5:</strong> accuracy: 0.9532 | loss: 0.2214 | val_accuracy: 0.7628 | val_loss: 1.9244</li>
+</ul>
+
+<h2 id="making-predictions">🔮 Making Predictions on New X-Rays</h2>
+<pre><code>from keras.preprocessing import image
 from keras.models import load_model
 from keras.applications.vgg16 import preprocess_input
 import numpy as np
 
-# Load the saved model
 model = load_model('our_model.h5')
 
-# Load and preprocess the X-ray image
 img = image.load_img('/content/chest_xray/test/PNEUMONIA/person100_bacteria_480.jpeg', target_size=(224, 224))
 imagee = image.img_to_array(img)
 imagee = np.expand_dims(imagee, axis=0)
 img_data = preprocess_input(imagee)
 
-# Predict
 prediction = model.predict(img_data)
 
 if prediction[0][0] > prediction[0][1]:
     print('Person is safe.')
 else:
     print('Person is affected with Pneumonia.')
-
-print(f'Predictions: {prediction}')
-Sample Output:1/1 ━━━━━━━━━━━━━━━━━━━━ 1s 779ms/step
-Person is affected with Pneumonia.
-Predictions: [[0. 1.]]
+print(f'Predictions: {prediction}')</code></pre>
